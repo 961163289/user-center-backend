@@ -1,11 +1,14 @@
 package com.yupi.usercenter.service;
 
 import com.yupi.usercenter.model.User;
+import org.junit.Assert;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import javax.annotation.Resource;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * 用户服务测试
@@ -71,4 +74,13 @@ class UserServiceTest {
         Assertions.assertEquals(-1, result);
 //        Assertions.assertTrue(result > 0);
     }
+
+
+    @Test
+    public void searchUsersByTags(){
+        List<String> tagNameList = Arrays.asList("java","python");
+        List<User> userList = userService.searchUsersByTags(tagNameList);
+        Assert.assertNotNull(userList);
+    }
+
 }
