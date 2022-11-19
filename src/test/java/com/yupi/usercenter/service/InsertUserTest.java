@@ -64,14 +64,14 @@ public class InsertUserTest {
         int batchSize = 5000;
         int j = 0;
         List<CompletableFuture<Void>> futureList = new ArrayList<>();
-        for (int i = 0; i < 20; i++) {
+        for (int i = 0; i < 100; i++) {
             List<User> userList = new ArrayList<>();
             while(true){
                 j++;
                 User user = new User();
                 user.setUsername("假鱼皮");
                 user.setUserAccount("fakeyupi");
-                user.setAvatarUrl("https://636f-codenav-8grj8px727565176-1256524210.tcb.qcloud.la/img/logo.png");
+                user.setAvatarUrl("https://typora-1313423481.cos.ap-guangzhou.myqcloud.com/typora/image-20221119095438434.png");
                 user.setGender(0);
                 user.setUserPassword("12345678");
                 user.setPhone("13318030996");
