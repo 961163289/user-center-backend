@@ -1,14 +1,12 @@
 package com.yupi.usercenter.service;
 
-import com.yupi.usercenter.mapper.UserMapper;
-import com.yupi.usercenter.model.User;
+import com.yupi.usercenter.model.domain.User;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.util.StopWatch;
 
 import javax.annotation.Resource;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.*;
 

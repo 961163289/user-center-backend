@@ -7,7 +7,7 @@ import com.google.gson.reflect.TypeToken;
 import com.yupi.usercenter.common.ErrorCode;
 import com.yupi.usercenter.contant.UserConstant;
 import com.yupi.usercenter.exception.BusinessException;
-import com.yupi.usercenter.model.User;
+import com.yupi.usercenter.model.domain.User;
 import com.yupi.usercenter.service.UserService;
 import com.yupi.usercenter.mapper.UserMapper;
 import lombok.extern.slf4j.Slf4j;

@@ -1,8 +1,7 @@
 package com.yupi.usercenter.once;
 
 import com.yupi.usercenter.mapper.UserMapper;
-import com.yupi.usercenter.model.User;
-import org.springframework.scheduling.annotation.Scheduled;
+import com.yupi.usercenter.model.domain.User;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StopWatch;
 

@@ -2,7 +2,7 @@ package com.yupi.usercenter.job;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.yupi.usercenter.model.User;
+import com.yupi.usercenter.model.domain.User;
 import com.yupi.usercenter.service.UserService;
 import lombok.extern.slf4j.Slf4j;
 import org.redisson.api.RLock;
