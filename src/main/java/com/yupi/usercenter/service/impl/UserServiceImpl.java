@@ -7,11 +7,11 @@ import com.google.gson.reflect.TypeToken;
 import com.yupi.usercenter.common.ErrorCode;
 import com.yupi.usercenter.contant.UserConstant;
 import com.yupi.usercenter.exception.BusinessException;
-import com.yupi.usercenter.model.domain.User;
-import com.yupi.usercenter.model.vo.UserVO;
-import com.yupi.usercenter.service.UserService;
 import com.yupi.usercenter.mapper.UserMapper;
+import com.yupi.usercenter.model.domain.User;
+import com.yupi.usercenter.service.UserService;
 import com.yupi.usercenter.utils.AlgorithmUtils;
+import javafx.util.Pair;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
@@ -24,7 +24,6 @@ import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static com.yupi.usercenter.contant.UserConstant.USER_LOGIN_STATE;
 
@@ -269,38 +268,57 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
 
     @Override
     public List<User> matchUsers(long num, User loginUser) {
-        List<User> userList = this.list();
+        QueryWrapper<User> queryWrapper = new QueryWrapper<>();
+        // 只查需要的数据(比如 id 和 tags)
+        queryWrapper.select("id", "tags");
+        // 过滤掉标签为空的用户
+        queryWrapper.isNotNull("tags");
+        List<User> userList = this.list(queryWrapper);
+
         String tags = loginUser.getTags();
         Gson gson = new Gson();
         List<String> tagList = gson.fromJson(tags, new TypeToken<List<String>>() {
         }.getType());
         // 用户列表的下标 => 相似度
-        SortedMap<Integer, Long> indexDistanceMap = new TreeMap<>();
+        List<Pair<User, Long>> list = new ArrayList<>();
+        // 依次计算所有用户和当前用户的相似度
         for (int i = 0; i < userList.size(); i++) {
             User user = userList.get(i);
             String userTags = user.getTags();
-            // 无标签
-            if (StringUtils.isBlank(userTags)) {
+            // 无标签 或 当前用户自己
+            if (StringUtils.isBlank(userTags) || user.getId() == loginUser.getId()) {
                 continue;
             }
             List<String> userTagList = gson.fromJson(userTags, new TypeToken<List<String>>() {
             }.getType());
             // 计算分数
             long distance = AlgorithmUtils.minDistance(tagList, userTagList);
-            indexDistanceMap.put(i, distance);
+            list.add(new Pair<>(user, distance));
         }
-        List<User> userVOList = new ArrayList<>();
-        int i = 0;
-        for (Map.Entry<Integer, Long> entry : indexDistanceMap.entrySet()){
-            if (i>num){
-                break;
-            }
-            User user = userList.get(entry.getKey());
-            System.out.println(user.getId() + ":" + entry.getKey() + ":" + entry.getValue());
-            userVOList.add(user);
-            i++;
+        // 按编辑距离从小到大排序
+        List<Pair<User, Long>> topUserPairList = list.stream()
+                .sorted((a, b) -> (int) (a.getValue() - b.getValue()))
+                .limit(num)
+                .collect(Collectors.toList());
+        // 原本顺序的 userId 列表
+        // 取出 topUserPairList 中每一项的 key 组成一个新的 list
+        List<Long> userIdList = topUserPairList.stream().map(pair -> pair.getKey().getId()).collect(Collectors.toList());
+        // 根据 uid 查询出对应的用户 并 脱敏
+        QueryWrapper<User> userQueryWrapper = new QueryWrapper<>();
+        userQueryWrapper.in("id", userIdList);
+        // 1, 3, 2
+        // User1、User2、User3
+        // 1 => User1, 2 => User2, 3 => User3
+        // 根据 Id 去分组,但每一组只有一个用户
+        Map<Long, List<User>> userIdUserListMap = this.list(userQueryWrapper)
+                .stream()
+                .map(user -> getSafetyUser(user))
+                .collect(Collectors.groupingBy(User::getId));
+        List<User> finalUserList = new ArrayList<>();
+        for (Long userId : userIdList){
+            finalUserList.add(userIdUserListMap.get(userId).get(0));
         }
-        return userVOList;
+        return finalUserList;
     }
 
 
